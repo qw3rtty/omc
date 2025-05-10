@@ -19,6 +19,7 @@ in the `README.md` file provided.
 ## Project structure
 This collection contains the following tools:
 - **amsi-knockout**: Tool to bypass AMSI permanently on the given process name
+- **obfuscator**: Tool to obfuscate payloads
 
 ## License
 This project is licensed under GPL-3.0.
