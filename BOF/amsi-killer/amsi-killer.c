@@ -148,8 +148,8 @@ void go(char *args, int len) {
     BeaconDataParse(&p, args, len);
     procName = BeaconDataExtract(&p, NULL);
     if (!procName) {
-        BeaconPrintf(CALLBACK_ERROR, "Usage: <process.exe>");
-        return;
+        procName = "powershell.exe";
+        BeaconPrintf(CALLBACK_ERROR, "Usage: <process.exe>, using default value...");
     }
 
     BeaconPrintf(CALLBACK_OUTPUT, "[*] Target: %s", procName);
