@@ -9,9 +9,9 @@ typedef struct _CLIENT_ID {
 } CLIENT_ID, *PCLIENT_ID;
 
 typedef struct _UNICODE_STRING {
-  USHORT Length;
-  USHORT MaximumLength;
-  PWSTR  Buffer;
+    USHORT Length;
+    USHORT MaximumLength;
+    PWSTR  Buffer;
 } UNICODE_STRING, *PUNICODE_STRING;
 
 typedef struct _OBJECT_ATTRIBUTES {
@@ -81,15 +81,14 @@ void patchRemoteSyscall(DWORD pid, NtOpenProcess_t NtOpenProcess, NtReadVirtualM
 
     HANDLE hProc = NULL;
     CLIENT_ID cid = { (HANDLE)(ULONG_PTR)pid, NULL };
-    //OBJECT_ATTRIBUTES oa = { sizeof(oa), NULL, NULL, NULL, NULL, NULL };
-	OBJECT_ATTRIBUTES oa = {
-		.Length = sizeof(oa),
-		.RootDirectory = NULL,
-		.ObjectName = NULL,
-		.Attributes = 0,
-		.SecurityDescriptor = NULL,
-		.SecurityQualityOfService = NULL
-	};
+    OBJECT_ATTRIBUTES oa = {
+        .Length = sizeof(oa),
+        .RootDirectory = NULL,
+        .ObjectName = NULL,
+        .Attributes = 0,
+        .SecurityDescriptor = NULL,
+        .SecurityQualityOfService = NULL
+    };
     if (!NT_SUCCESS(NtOpenProcess(&hProc, PROCESS_VM_READ|PROCESS_VM_WRITE|PROCESS_VM_OPERATION|PROCESS_VM_QUERY_INFORMATION, &oa, &cid))) {
         BeaconPrintf(CALLBACK_ERROR, "NtOpenProcess failed %d", pid);
         return;
